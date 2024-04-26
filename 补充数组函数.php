@@ -40,6 +40,28 @@
 	//在开头增加元素
 	array_unshift($a,$head,50,60,70);
 	print_r($a);
+	
+	//合并
+	echo "<hr>";
+	$a1 = array("a"=>"red","b"=>"green");
+	$a2 = array("c"=>"blue","b"=>"yellow");
+	$a3 = array("c"=>"blue","d"=>"yellow");
+	$a4 = array("3"=>"blue","5"=>"yellow","7"=>"res","9"=>"green");
+	print_r(array_merge($a1,$a2));//有相同的键b，a1的b会被a2的b覆盖
+	echo "<br>";
+	print_r(array_merge($a1,$a3));//a1和a2合并
+	echo "<br>";
+	print_r(array_merge($a4));//键会重新排序
+	echo "<br>";
+	//从数组中取出一段序列
+	$b1 = array("a"=>"red","b"=>"green","c"=>"blue","d"=>"yellow");
+	$b2 = array("a"=>"purple","b"=>"orange");
+	print_r(array_slice($b1,-1));
+	echo "<br>";
+	//从数组中移除选定的元素，并用新元素替代，返回移除或被替换的元素
+	print_r(array_splice($b1,0,2,$b2));
+	echo "<br>";
+	print_r($b1);
 ?>
 </body>
 </html>
