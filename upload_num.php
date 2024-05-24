@@ -8,6 +8,7 @@
 <body>
 <?php
 	if(isset($_POST['token']) && $_POST['token']=='upload'){
+		/*
 		if($_FILES['upload']['name']==''){
 			echo '上传失败，请选择文件';
 			die();	
@@ -27,11 +28,25 @@
 				echo '不支持该类型文件';		
 			}
 		}
+		*/
+		$arr = $_FILES['upload'];
+		foreach($arr['name'] as $key=>$value){
+			if($value!=''){
+				//文件上传
+				$tmp_name=$arr['tmp_name'][$key];
+				$name=uniqid().'.'.pathinfo($value,PATHINFO_EXTENSION);
+				$dst_name="D:\AppServ\www\upload/".$name;
+				move_uploaded_file($tmp_name,$dst_name);
+				echo '文件上传成功<br/>';
+			}
+		}	
 	}else{
 ?>
 <form method="post" action="" enctype="multipart/form-data">
 图片标题：<input type="text" name="title"/><br />
-<input type="file" name="upload"/><br />
+<input type="file" name="upload[]"/><br />
+<input type="file" name="upload[]"/><br />
+<input type="file" name="upload[]"/><br />
 <input type="submit" value="提交"/>
 <input type="hidden" name="token" value="upload"/>
 </form>
@@ -39,5 +54,4 @@
 	}
 ?>
 </body>
-
 </html>
