@@ -1,79 +1,78 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
+  margin: auto;
   min-width: 320px;
   min-height: 100vh;
 }
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.card {
-  padding: 2em;
-}
-
 #app {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.background-container {
+  background-image: url('./assets/img/timg.jpg');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-attachment: fixed;
+  height: 100vh; /* 确保 div 高度与视口一致 */
+  display: flex;
+  flex-direction: column;/*垂直方向排列子元素*/
+  justify-content: columu;/*水平居中*/
+  align-items: center;/*垂直方向对齐*/
+}
+
+.title-container{
+  margin-bottom: 20px;/*标题容器与登录表单容器之间留出一些间距*/
+}
+
+.title {
+  text-align: center;
+  color: white;
+  font-family: '华文行楷';
+  font-size: 5em; /* 更改为 5em 符合 CSS 单位习惯 */
+}
+
+.login-container{
+  background-color: white;
+  width: 25%;
+  height: 40%;
+  border-radius: 1%;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+.register-container{
+  background-color: white;
+  width: 25%;
+  height: 68%;
+  border-radius: 1%;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.item-container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.a-container{
+  float: right;
+}
+
+.a {
+  text-decoration: none; /* 移除下划线 */
+  color: #606266; /* 设置文字颜色为蓝色 */
+  font-weight: bold; /* 设置文字加粗 */
+  transition: color 0.3s ease; /* 添加颜色变化的过渡效果 */
+  cursor: pointer;
+}
+
+.a:hover {
+  color: #0056b3; /* 设置鼠标悬停时的文字颜色 */
+}
+
+.a:focus {
+  outline: none; /* 移除点击时的虚线框 */
+}
+
+.a:active {
+  color: #002752; /* 设置点击时的文字颜色 */
 }
