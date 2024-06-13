@@ -1,5 +1,17 @@
 <?php
     header("Content-Type:application/json");
+
+    //在进行操作前判断现在是否登录
+    //打开或恢复session
+    session_start();
+    //未设置的话
+    if(!isset($_SESSION['isLogin'])||$_SESSION['isLogin']==false){
+        echo json_encode([
+            'status' => 'noLogin'
+        ]);
+        die();
+    }
+    
     //获取原始请求体数据，php://input 允许读取原始的 POST 数据，这对于接收 JSON 数据是必要的
     $json = file_get_contents('php://input');
 

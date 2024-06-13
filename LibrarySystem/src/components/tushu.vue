@@ -1,9 +1,25 @@
 <template>
 <div class="background-container-tushu">
+
+  <!-- 头像 -->
+  <!-- <div class="head_portrait">
+    <div><el-avatar class="head_portrait_avatar">莫七</el-avatar></div>
+  </div> -->
+  <!-- 点击头像后的弹出框 -->
+   <!-- <el-dialog style="width:10%;height:20%" v-model="showHeadProtraitDialog">
+    
+   </el-dialog> -->
+
   <a @click="exit()" class="a-tushu">退出</a>
 
   <div class="button-container">
-    <el-button type="primary" @click="showAddDialog = true" class="large-button">增加</el-button>
+    <el-form size="large" @submit.prevent><!--@submit.prevent 阻止表单提交-->
+      <el-form-item>
+        <!-- 输入框内容改变时触发事件调用insertAll方法，该方法会向数据库拿到所有数据并对其进行过滤 -->
+        <el-input v-model="keyword" @input="insertAll()" placeholder="请输入书名/出版社关键词" style="font-size: 20px;"></el-input>
+      </el-form-item>
+    </el-form>
+    <el-button type="primary" @click="showAddDialog = true" class="large-button" style="margin-left: 400px;">增加</el-button>
     <el-button type="primary" @click="delSelected()" class="large-button">删除所选</el-button>
   </div>
 
@@ -74,6 +90,7 @@
   import { onMounted,ref } from 'vue';
   import { ElMessage,ElMessageBox } from 'element-plus';//信息弹窗包和弹出框包
   import axios from 'axios';
+  import { UserFilled } from '@element-plus/icons-vue';//头像控件
 
   //保存页面和修改页面的开关
   let showAddDialog = ref(false);
@@ -82,25 +99,33 @@
   let addForm = ref({}); 
   //创建一个响应式引用，用于对多选行操作
   let tableData = ref();
+  //用于存储页面中搜索框中的数据
+  let keyword = ref();
 
   const message = ref('');
   const books = ref([]);
 
+  //根据条件搜索
+  // const select = async()=>{
+  //   await insertAll();//先从数据库中更新全部书籍
+  //   //过滤掉书名和出版社中不包含输入框数据的
+  //   books.value = books.value.filter(item => item.book_name.includes(keyword.value)||item.publishing_house.includes(keyword.value));
+  // }
+  
   //添加书籍
   const doAdd = async()=>{
     await fetchData('book_insert');
+    if(message.value.status == 'noLogin'){
+      location.reload();//未登录刷新页面回到登录页面
+    }
     if(message.value.status=='success'){
       //添加成功
       ElMessage({
         message: message.value.message,
         type: 'success',
       })
-      //清空addForm
-      dialogClosed();
-      //设置延迟刷新页面，使弹窗走完
-      setTimeout(() => {
-        location.reload();
-      }, 500);
+      //在关闭添加弹出框的时候会自动调用dialogClosed()删除addForm
+      showAddDialog.value = false;
     }else if(message.value.status=='error'){
       //添加失败
       console.log(message.value.error_message);
@@ -108,11 +133,116 @@
     }
     //最后记得清空message防止出错
     message.value = '';
+    //更新一下页面数据
+    await insertAll();
   }
 
-  //删除书籍
-  
+  //删除所选行
+  const delSelected=async()=>{
+    //打开确认对话框，显示指定的信息和标题
+    ElMessageBox.confirm(
+        '确认删除所选行吗',//参数一：提示内容
+        '警告',//参数二：提示标题
+        {
+            confirmButtonText:'确认',//确认按钮的文字
+            cancelButtonText:'取消',//取消按钮的文字
+            type:'warning'//样式
+        }
+    )
+    .then(async()=>{//ok事件
+        //将要删除的id传入addForm
+        let rows = tableData.value.getSelectionRows();
+        //如果没有所选行弹窗提示
+        if(rows==''){
+          ElMessage({
+            message: '未选中'
+          })
+          return;
+        }
+        addForm.value.rows = rows;
+        //在数据库进行操作
+        await fetchData('book_delSelected');
+        if(message.value.status == 'noLogin'){
+          location.reload();//未登录刷新页面回到登录页面
+        }
+        if(message.value.status=='success'){
+          //删除成功
+          //数据库删除成功页面才可以删除数据
+          books.value = books.value.filter(item=> !rows.includes(item));
+          //await insertAll();
+          ElMessage({
+            message: message.value.message,
+            type: 'success',
+          })
+        }else if(message.value.status=='error'){
+          //添加失败
+          console.log(message.value.error_message);
+          ElMessage.error(message.value.message);
+        }
+        //将addForm清空
+        addForm.value = {};
+        //最后记得清空message防止出错
+        message.value = '';
+    })
+    .catch(()=>{//取消事件
+        ElMessage({
+            type: 'info',//表示普通的提示信息
+            message: '取消删除',
+        })
+    })
+  }
+  //删除指定id行，点击有 确认删除 信息弹出框
+  const del = id =>{
+      //打开确认对话框，显示指定的信息和标题
+      ElMessageBox.confirm(
+          '确认删除吗',//参数一：提示内容
+          '警告',//参数二：提示标题
+          {
+              confirmButtonText:'确认',//确认按钮的文字
+              cancelButtonText:'取消',//取消按钮的文字
+              type:'warning'//样式
+          }
+      )
+      .then(async()=>{//ok事件
+          //将要删除的id传入addForm
+          addForm.value.id=id;
+          //在数据库进行操作
+          await fetchData('book_del');
+          if(message.value.status == 'noLogin'){
+            location.reload();//未登录刷新页面回到登录页面
+          }
+          if(message.value.status=='success'){
+            //删除成功
+            //数据库删除成功页面才可以删除数据
+            books.value.forEach((item,i) => {
+                if(item.id == id){
+                    //删除i位置开始的1个数据
+                    books.value.splice(i,1);
+                }
+            })
+            ElMessage({
+              message: message.value.message,
+              type: 'success',
+            })
+          }else if(message.value.status=='error'){
+            //添加失败
+            console.log(message.value.error_message);
+            ElMessage.error(message.value.message);
+          }
+          //将addForm清空
+          addForm.value = {};
+          //最后记得清空message防止出错
+          message.value = '';
+      })
+      .catch(()=>{//取消事件
+          ElMessage({
+              type: 'info',//表示普通的提示信息
+              message: '取消删除',
+          })
+      })
+  }
 
+  //退出
   const exit = async()=>{
     await fetchData('exit');
     location.reload();
@@ -127,14 +257,38 @@
     addForm.value.publication_date = new Date(row.publication_date);
     addForm.value.publishing_house = row.publishing_house;
   }
+  //保存修改
+  const doModify = async()=>{
+    await fetchData('book_update');
+    if(message.value.status == 'noLogin'){
+      location.reload();//未登录刷新页面回到登录页面
+    }
+    if(message.value.status=='success'){
+      //修改成功
+      ElMessage({
+        message: message.value.message,
+        type: 'success',
+      })
+      //在关闭添加弹出框的时候会自动调用dialogClosed()删除addForm
+      showEditDialog.value = false;
+    }else if(message.value.status=='error'){
+      //修改失败
+      console.log(message.value.error_message);
+      ElMessage.error(message.value.message);
+    }
+    //最后记得清空message防止出错
+    message.value = '';
+    //更新一下页面数据
+    await insertAll();
+  }
 
   //弹窗关闭时清空addForm
   const dialogClosed = () =>{
     addForm.value = {};
   }
 
-  //页面刷新自动调用查询数据
-  onMounted(async()=>{
+  //向数据库查询所有数据并填入，会对输入框进行判断执行过滤逻辑
+  const insertAll=async()=>{
     await fetchData('book_view');
     if(message.value.status=='success'){
       //查询成功
@@ -148,6 +302,15 @@
     }
     //最后记得清空message防止出错
     message.value = '';
+    //拿到所有数据后对数据进行过滤，过滤掉书名和出版社中不包含输入框数据的
+    if(keyword.value!=undefined){//当keyword.value是未定义时，includes函数错误，导致books数据都被过滤掉
+      books.value = books.value.filter(item => item.book_name.includes(keyword.value)||item.publishing_house.includes(keyword.value));
+    }
+  }
+
+  //页面刷新自动调用查询数据
+  onMounted(async()=>{
+    await insertAll();
   })
 
   //异步函数发送请求
@@ -181,7 +344,7 @@
   }
 
   .button-container{
-    width: 400px;
+    width: 50%;
     margin-top: 80px;
     display: flex;
     justify-content: space-between;/*两端对齐，空白部分都留在中间*/
@@ -195,6 +358,25 @@
   .table-container{
     width: 60%;
     height: 70%;
+  }
+
+  /*头像样式*/
+  .head_portrait{
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+  }
+  .head_portrait > div{
+    flex:1;/* 子元素均匀分布 */
+    text-align: center;/* 子元素内容居中 */
+  }
+  .head_portrait > div:not(:last-child){
+    border-right: 1px solid var(--el-border-color);
+  }
+  .head_portrait_avatar{
+    background-color: #512DA8;
+    color: white;
   }
 
   .a-tushu {
@@ -216,5 +398,10 @@
   }
   .a-tushu:active {
     color: #002752; /* 设置点击时的文字颜色 */
+    background-color: aqua;
+    background-image: url();
+    background-size: 100% 100%;
+    width: 100%;
+    height: 100%;
   }
 </style>

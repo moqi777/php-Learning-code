@@ -32,10 +32,10 @@
       <h2>注册</h2><hr/><br/>
       <el-form :model="form" label-width="auto" style="max-width: 600px;">
         <el-form-item label="* 账号：">
-          <el-input v-model="form.name" placeholder="由数组或字母组成"/>
+          <el-input v-model="form.name" placeholder="由数字或字母组成"/>
         </el-form-item>
         <el-form-item label="* 密码：">
-          <el-input v-model="form.password" type="password" placeholder="由数组或字母组成"/>
+          <el-input v-model="form.password" type="password" placeholder="由数字或字母组成"/>
         </el-form-item>
         <el-form-item label="* 确认密码：">
           <el-input v-model="form.passwordTo" type="password" placeholder="再次输入密码"/>
@@ -71,6 +71,14 @@
       </el-form>
     </div>
 
+  </div>
+  <!-- 水印 -->
+  <div class="watermark" v-if="false">
+    <table>
+      <tr v-for="row in 9" :key="row">
+        <td v-for="col in 8" :key="col">{{ '230311371 郑伊龙' }}</td>
+      </tr>
+    </table>
   </div>
 </template>
 
@@ -133,14 +141,29 @@ const login=async()=>{
 
 //注册
 const register = async()=>{
+  /*
+    ^：表示匹配字符串的开始。它确保匹配从字符串的起始位置开始。
+    [a-zA-Z0-9]：表示一个字符集，匹配其中的任何一个字符。具体来说，它包含：
+      a-z：所有小写字母 (a 到 z)。
+      A-Z：所有大写字母 (A 到 Z)。
+      0-9：所有数字 (0 到 9)。
+    +：表示前面的字符集可以出现一次或多次。即，字符串中可以有一个或多个字母或数字。
+    $：表示匹配字符串的结束。它确保匹配到字符串的末尾。
+  */
+  const regex = /^[a-zA-Z0-9]+$/;
   if(form.name==''||form.password==''||form.passwordTo==''||form.realName==''){
     ElMessage({
     message:'必填项为空 *'
   })
+  //test 方法用于测试一个字符串是否匹配正则表达式
+  }else if(!regex.test(form.name)||!regex.test(form.password)){
+    ElMessage({
+    message:'账号或密码格式错误！'
+    })
   }else if(form.password!=form.passwordTo){
     ElMessage({
     message:'两次密码不一致'
-  })
+    })
   }else{
     //发起请求,注意：await关键字必须在asyns函数里面使用，调用异步函数时也必须使用await关键字
     await fetchData('register');

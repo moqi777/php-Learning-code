@@ -76,3 +76,31 @@ body {
 .a:active {
   color: #002752; /* 设置点击时的文字颜色 */
 }
+
+.watermark{
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  bottom: 0px;
+  color: #CCCCCC;
+  font-size: 14px;
+  /* 元素不响应鼠标事件，即使鼠标光标悬停在该元素上，
+  也不会触发事件，事件将会传递到其下面的元素。
+  防止水印文字影响用户操作 */
+  pointer-events: none;
+}
+.watermark table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+}
+.watermark td,th {
+  text-align: center;
+  padding: 10px;
+  transform: rotate(-30deg); /* 将水印文字倾斜 -30 度 */
+}
+/* 设置了水印倾斜会导致tuchu.vue子组件下的表格表头也倾斜，需要单独将表头倾斜取消 */
+.table-container th {
+  transform: none; /* 将表头重置为不倾斜 */
+}

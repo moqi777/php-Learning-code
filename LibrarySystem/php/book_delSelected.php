@@ -21,7 +21,7 @@
     //检查是否正确解码JSON
     if(json_last_error() === JSON_ERROR_NONE){
         //获取字段
-        $id = $data['id'];
+        $rows = $data['rows'];
 
         //导入连接
         include "conn.php";
@@ -36,34 +36,37 @@
         }
 
         //(5)执行SQl
-        //准备插入语句
-        $sql = "delete from book where id = ?";
-        $stmt = mysqli_prepare($conn,$sql);
-        if($stmt === false){
-            echo json_encode([
-                'status' => 'error',
-                'message' => '删除失败！',
-                'error_message' => '删除失败！准备语句失败！'.mysqli_error($conn)
-            ]);
-            mysqli_close($conn);
-            die();
+        //对rows遍历循环删除
+        foreach($rows as $v){
+            $id = $v['id'];
+            //准备插入语句
+            $sql = "delete from book where id = ?";
+            $stmt = mysqli_prepare($conn,$sql);
+            if($stmt === false){
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => '删除失败！',
+                    'error_message' => '删除失败！准备语句失败！'.mysqli_error($conn)
+                ]);
+                mysqli_close($conn);
+                die();
+            }
+            //绑定参数
+            mysqli_stmt_bind_param($stmt,'s',$id);
+            //执行语句
+            if(!mysqli_stmt_execute($stmt)){
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => '删除失败！',
+                    'error_message' => '删除失败！'.mysqli_stmt_error($stmt)
+                ]);
+            }
         }
-        //绑定参数
-        mysqli_stmt_bind_param($stmt,'s',$id);
-        //执行语句
-        if(mysqli_stmt_execute($stmt)){
-            //执行成功
-            echo json_encode([
-                'status' => 'success',
-                'message' => '删除成功！'
-            ]);
-        }else{
-            echo json_encode([
-                'status' => 'error',
-                'message' => '删除失败！',
-                'error_message' => '删除失败！'.mysqli_stmt_error($stmt)
-            ]);
-        }
+        //全部执行成功
+        echo json_encode([
+            'status' => 'success',
+            'message' => '删除成功！'
+        ]);
         //(6)关闭结果集
         mysqli_stmt_close($stmt);
         //(7)关闭服务器
