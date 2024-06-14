@@ -304,7 +304,7 @@
     message.value = '';
     //拿到所有数据后对数据进行过滤，过滤掉书名和出版社中不包含输入框数据的
     if(keyword.value!=undefined){//当keyword.value是未定义时，includes函数错误，导致books数据都被过滤掉
-      books.value = books.value.filter(item => item.book_name.includes(keyword.value)||item.publishing_house.includes(keyword.value));
+      books.value = books.value.filter(item => item.book_name.includes(keyword.value));
     }
   }
 

@@ -73,7 +73,7 @@
 
   </div>
   <!-- 水印 -->
-  <div class="watermark" v-if="false">
+  <div class="watermark" v-if="true">
     <table>
       <tr v-for="row in 9" :key="row">
         <td v-for="col in 8" :key="col">{{ '230311371 郑伊龙' }}</td>
